@@ -1,0 +1,10 @@
+{
+  "name": "voiceguard-workspace",
+  "version": "1.0.0",
+  "description": "VoiceGuard AI - Forensic Voice Biometrics & AI-Cloned Voice Detector",
+  "scripts": {
+    "server": "npm --prefix server start",
+    "client": "npm --prefix client dev",
+    "dev": "node start-all.js"
+  }
+}
