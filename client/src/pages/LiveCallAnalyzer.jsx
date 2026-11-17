@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import WaveformVisualizer from '../components/WaveformVisualizer';
 import SecondaryVerificationModal from '../components/SecondaryVerificationModal';
+import { apiFetch } from '../utils/api';
 import { 
   Radio, PhoneIncoming, ShieldCheck, ShieldAlert, AlertTriangle, 
   Mic, Square, Upload, RefreshCw, Zap, Clock, FileAudio
@@ -36,10 +37,7 @@ export const LiveCallAnalyzer = () => {
   // Fetch genuine voice profiles
   const fetchProfiles = async () => {
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/voice/genuine-reports', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/voice/genuine-reports');
       const data = await res.json();
       if (res.ok) {
         setGenuineProfiles(data.reports || []);
@@ -59,10 +57,7 @@ export const LiveCallAnalyzer = () => {
 
   const fetchCallHistory = async () => {
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/live-call/history', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/live-call/history');
       const data = await res.json();
       if (res.ok) setCallHistory(data.calls || []);
     } catch (err) {
@@ -174,12 +169,8 @@ export const LiveCallAnalyzer = () => {
     if (callerEmail) formData.append('callerEmail', callerEmail);
 
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/live-call/analyze', {
+      const res = await apiFetch('/api/live-call/analyze', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
 

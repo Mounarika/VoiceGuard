@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch } from '../utils/api';
 import { 
   Database, Lock, Trash2, Volume2, 
   Activity, Waves, Sparkles, Clock, RefreshCw, ChevronDown, ChevronUp, UserCheck
@@ -14,10 +15,7 @@ export const GenuineVault = ({ onTestInLiveCall }) => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/voice/genuine-reports', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/voice/genuine-reports');
       const data = await res.json();
       if (res.ok) setReports(data.reports || []);
     } catch (err) {
@@ -34,10 +32,8 @@ export const GenuineVault = ({ onTestInLiveCall }) => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this genuine voice report?')) return;
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch(`/api/voice/genuine-reports/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await apiFetch(`/api/voice/genuine-reports/${id}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
         setReports(reports.filter(r => r.id !== id));

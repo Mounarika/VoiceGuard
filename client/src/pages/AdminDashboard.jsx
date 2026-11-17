@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch } from '../utils/api';
 import { 
   ShieldCheck, Activity, AlertOctagon, 
   BarChart, RefreshCw, Database, CheckCircle, ShieldAlert
@@ -9,18 +10,19 @@ export const AdminDashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchAdminStats = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/spam/admin-stats', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/spam/admin-stats');
       const data = await res.json();
-      if (res.ok) setStats(data.stats);
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch admin stats.');
+      setStats(data.stats);
     } catch (err) {
       console.error('Failed to fetch admin stats:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -47,6 +49,13 @@ export const AdminDashboard = () => {
         </button>
       </div>
 
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center justify-between">
+          <span>{error}</span>
+          <button type="button" onClick={fetchAdminStats} className="font-semibold underline">Retry</button>
+        </div>
+      )}
+
       {/* Admin User Info Tag */}
       <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl flex items-center justify-between text-xs text-purple-900">
         <div className="flex items-center space-x-2">
@@ -67,7 +76,7 @@ export const AdminDashboard = () => {
           <div>
             <div className="text-[11px] text-slate-500 font-semibold uppercase">Total Analyses</div>
             <div className="text-xl font-bold text-slate-900">
-              {stats ? stats.totalAnalyses : '0'}
+              {loading ? '…' : (stats?.totalAnalyses ?? '—')}
             </div>
           </div>
         </div>
@@ -79,7 +88,7 @@ export const AdminDashboard = () => {
           <div>
             <div className="text-[11px] text-slate-500 font-semibold uppercase">AI Spoofs Detected</div>
             <div className="text-xl font-bold text-rose-600">
-              {stats ? stats.aiDetections : '0'}
+              {loading ? '…' : (stats?.aiDetections ?? '—')}
             </div>
           </div>
         </div>
@@ -91,7 +100,7 @@ export const AdminDashboard = () => {
           <div>
             <div className="text-[11px] text-slate-500 font-semibold uppercase">Genuine Reports</div>
             <div className="text-xl font-bold text-emerald-600">
-              {stats ? stats.genuineVaultCount : '0'}
+              {loading ? '…' : (stats?.genuineVaultCount ?? '—')}
             </div>
           </div>
         </div>
@@ -103,7 +112,7 @@ export const AdminDashboard = () => {
           <div>
             <div className="text-[11px] text-slate-500 font-semibold uppercase">Spam Reports</div>
             <div className="text-xl font-bold text-slate-900">
-              {stats ? stats.totalSpamReports : '0'}
+              {loading ? '…' : (stats?.totalSpamReports ?? '—')}
             </div>
           </div>
         </div>
@@ -120,24 +129,31 @@ export const AdminDashboard = () => {
           <div className="space-y-3 text-xs">
             <div>
               <div className="flex justify-between font-semibold mb-1 text-slate-700">
-                <span>Neural Vocoder Detection Accuracy:</span>
-                <span className="text-blue-600 font-mono font-bold">98.4%</span>
+                <span>AI detections among voice analyses:</span>
+                <span className="text-blue-600 font-mono font-bold">
+                  {loading ? '…' : `${stats?.aiDetectionRate ?? 0}%`}
+                </span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-blue-600 h-full rounded-full" style={{ width: '98.4%' }}></div>
+                <div className="bg-blue-600 h-full rounded-full" style={{ width: `${stats?.aiDetectionRate ?? 0}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between font-semibold mb-1 text-slate-700">
-                <span>Speaker Verification Precision:</span>
-                <span className="text-emerald-600 font-mono font-bold">96.8%</span>
+                <span>High-risk live calls:</span>
+                <span className="text-emerald-600 font-mono font-bold">
+                  {loading ? '…' : `${stats?.highRiskCallRate ?? 0}%`}
+                </span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-emerald-600 h-full rounded-full" style={{ width: '96.8%' }}></div>
+                <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${stats?.highRiskCallRate ?? 0}%` }}></div>
               </div>
             </div>
           </div>
+          <p className="mt-3 text-[11px] text-slate-500">
+            Derived from {stats?.totalAnalyses ?? 0} voice analyses and {stats?.totalLiveCalls ?? 0} live calls.
+          </p>
         </div>
 
         {/* Policies */}

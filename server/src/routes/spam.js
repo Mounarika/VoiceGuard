@@ -232,7 +232,8 @@ router.get('/admin-stats', authenticateToken, (req, res) => {
         highRiskCalls,
         totalSpamReports,
         suspiciousCallers,
-        aiSpoofBlockRate: totalAnalyses > 0 ? Math.round((aiDetections / totalAnalyses) * 100) : 94.2
+        aiDetectionRate: totalAnalyses > 0 ? Math.round((aiDetections / totalAnalyses) * 100) : 0,
+        highRiskCallRate: totalLiveCalls > 0 ? Math.round((highRiskCalls / totalLiveCalls) * 100) : 0
       }
     });
   } catch (err) {

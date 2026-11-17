@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, Lock, Mail, User, ShieldAlert, ArrowRight } from 'lucide-react';
 
 export const Login = () => {
-  const { login, register } = useAuth();
+  const { login, register, demoCredentials } = useAuth();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,13 +30,10 @@ export const Login = () => {
   };
 
   const handleFillCredentials = (type) => {
-    if (type === 'admin') {
-      setEmail('admin@voiceguard.ai');
-      setPassword('Admin@VoiceGuard2026!');
-    } else {
-      setEmail('user@voiceguard.ai');
-      setPassword('User@VoiceGuard2026!');
-    }
+    const credentials = demoCredentials?.[type];
+    if (!credentials) return;
+    setEmail(credentials.email);
+    setPassword(credentials.password);
   };
 
   return (
@@ -54,26 +51,34 @@ export const Login = () => {
           <div>
             <span className="font-semibold text-slate-800">System Accounts:</span>
             <div className="text-[11px] text-slate-500 mt-0.5 space-x-2">
-              <button 
-                type="button" 
-                onClick={() => handleFillCredentials('admin')}
-                className="text-blue-600 hover:underline font-medium"
-              >
-                Admin (admin@voiceguard.ai)
-              </button>
-              <span>•</span>
-              <button 
-                type="button" 
-                onClick={() => handleFillCredentials('user')}
-                className="text-blue-600 hover:underline font-medium"
-              >
-                User (user@voiceguard.ai)
-              </button>
+              {demoCredentials ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleFillCredentials('admin')}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    Admin ({demoCredentials.admin.email})
+                  </button>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={() => handleFillCredentials('user')}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    User ({demoCredentials.user.email})
+                  </button>
+                </>
+              ) : (
+                <span>Loading system accounts...</span>
+              )}
             </div>
           </div>
-          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">
-            Admin@VoiceGuard2026!
-          </span>
+          {demoCredentials && (
+            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">
+              {demoCredentials.admin.password}
+            </span>
+          )}
         </div>
 
         {/* Form Container */}

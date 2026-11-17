@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldAlert, PhoneCall, Mail, MessageSquare, CheckCircle, XCircle, RefreshCw, Send, Check } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export const SecondaryVerificationModal = ({
   callData,
@@ -44,12 +45,10 @@ export const SecondaryVerificationModal = ({
     setResultMessage(null);
 
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/live-call/send-otp', {
+      const res = await apiFetch('/api/live-call/send-otp', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           callId: callData.callId,
@@ -89,12 +88,10 @@ export const SecondaryVerificationModal = ({
     setResultMessage(null);
 
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/live-call/verify-secondary', {
+      const res = await apiFetch('/api/live-call/verify-secondary', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           callId: callData.callId,
@@ -124,12 +121,10 @@ export const SecondaryVerificationModal = ({
 
     setTimeout(async () => {
       try {
-        const token = localStorage.getItem('vg_token');
-        const res = await fetch('/api/live-call/verify-secondary', {
+        const res = await apiFetch('/api/live-call/verify-secondary', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             callId: callData.callId,

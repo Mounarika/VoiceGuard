@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import WaveformVisualizer from '../components/WaveformVisualizer';
+import { apiFetch } from '../utils/api';
 import { 
   Upload, Mic, Square, Play, Pause, AlertOctagon, CheckCircle2, 
   Activity, BarChart3, Waves, Volume2, Clock, Sparkles, 
@@ -16,6 +17,9 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [analysisHistoryError, setAnalysisHistoryError] = useState(null);
   const [error, setError] = useState(null);
 
   // Enroll modal state
@@ -31,6 +35,26 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
   const timerIntervalRef = useRef(null);
+
+  const fetchAnalysisHistory = async () => {
+    setLoadingHistory(true);
+    setAnalysisHistoryError(null);
+    try {
+      const res = await apiFetch('/api/voice/history');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load analysis history.');
+      setAnalysisHistory(data.history || []);
+    } catch (err) {
+      console.error('Failed to load analysis history:', err);
+      setAnalysisHistoryError(err.message);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalysisHistory();
+  }, []);
 
   // Recording duration timer
   useEffect(() => {
@@ -132,12 +156,8 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
     formData.append('audio', file);
 
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/voice/analyze', {
+      const res = await apiFetch('/api/voice/analyze', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
 
@@ -147,6 +167,7 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
       }
 
       setAnalysisResult(data);
+      fetchAnalysisHistory();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -161,12 +182,10 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
 
     setIsEnrolling(true);
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/voice/save-genuine', {
+      const res = await apiFetch('/api/voice/save-genuine', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           callerName: callerNameInput.trim(),
@@ -546,6 +565,50 @@ export const VoiceDetector = ({ onVoiceEnrolled }) => {
           </div>
         </div>
       )}
+
+      <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-slate-900">Recent Voice Analyses</h2>
+          <button
+            type="button"
+            onClick={fetchAnalysisHistory}
+            className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center space-x-1"
+          >
+            <RefreshCw className={`w-3 h-3 ${loadingHistory ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+        {loadingHistory ? (
+          <p className="p-6 text-center text-xs text-slate-400">Loading analysis history...</p>
+        ) : analysisHistoryError ? (
+          <div className="p-4 text-center text-xs text-rose-700">
+            <p>{analysisHistoryError}</p>
+            <button type="button" onClick={fetchAnalysisHistory} className="mt-2 font-semibold underline">
+              Retry
+            </button>
+          </div>
+        ) : analysisHistory.length ? (
+          <div className="divide-y divide-slate-100">
+            {analysisHistory.slice(0, 10).map((analysis) => (
+              <div key={analysis.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div>
+                  <div className="font-semibold text-slate-800">{analysis.sample_name}</div>
+                  <div className="text-slate-500">{new Date(analysis.created_at).toLocaleString()}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500">{analysis.duration}s</span>
+                  <span className={`font-bold ${analysis.is_ai ? 'text-rose-600' : 'text-emerald-700'}`}>
+                    {analysis.is_ai ? 'AI voice' : 'Genuine voice'}
+                  </span>
+                  <span className="font-mono text-slate-700">{analysis.confidence_score}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="p-6 text-center text-xs text-slate-400">No voice analyses recorded yet.</p>
+        )}
+      </section>
 
       {/* Store in Genuine Voice Reports Modal */}
       {showEnrollModal && (

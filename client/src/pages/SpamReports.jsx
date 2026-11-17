@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch } from '../utils/api';
 import { 
   ShieldAlert, UserX, Sliders, 
   PlusCircle, RefreshCw, CheckCircle, ChevronRight, AlertOctagon
@@ -29,10 +30,9 @@ export const SpamReports = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('vg_token');
       const [reportsRes, callersRes] = await Promise.all([
-        fetch('/api/spam/reports', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('/api/spam/callers', { headers: { 'Authorization': `Bearer ${token}` } })
+        apiFetch('/api/spam/reports'),
+        apiFetch('/api/spam/callers')
       ]);
 
       const reportsData = await reportsRes.json();
@@ -63,12 +63,10 @@ export const SpamReports = () => {
 
     setUpdatingScore(true);
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/spam/update-score', {
+      const res = await apiFetch('/api/spam/update-score', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           callerId: selectedCaller.id,
@@ -95,12 +93,10 @@ export const SpamReports = () => {
     e.preventDefault();
     setSubmittingManual(true);
     try {
-      const token = localStorage.getItem('vg_token');
-      const res = await fetch('/api/spam/report', {
+      const res = await apiFetch('/api/spam/report', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           callerPhone: manualPhone.trim(),

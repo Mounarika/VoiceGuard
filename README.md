@@ -21,6 +21,8 @@ As requested, both Admin and User credentials are provided up-front and prominen
 - **Backend REST API & DSP Engine**: [http://localhost:5000](http://localhost:5000)
 - **Health Check Endpoint**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
 
+For a frontend hosted separately from the API, set `VITE_API_BASE_URL` to the backend origin (for example, `http://localhost:5000`) before building or starting Vite. Leave it unset when using the included Vite proxy during local development.
+
 ---
 
 ## 🎙️ Key Features & Technical Capabilities
