@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Colab / runtime
+.huggingface
+HF_TOKEN
+
+# Test data / large files (clips + dataset archive live on DRIVE, not git)
+ml-core/test_data/*
+!ml-core/test_data/README.md
+ml-core/dataset/
+*.wav
+*.mp3
+*.flac
+*.ogg
+
+# Results + checkpoints are DURABLE ON DRIVE, not committed (mirrors folium).
+# Repo only tracks the empty results/ folder (.gitkeep).
+ml-core/results/*
+!ml-core/results/.gitkeep
+ml-core/checkpoints/
+
+# Local secrets
+.env
+
+# The fabricated/wrong PS file (not the real problem statement for SIH26104)
+SIH_2026_Problem_Statement_104.md
+
+# Internal notes (learn.md is a working reference, not a deliverable)
+ml-core/learn.md
+
+# Internal project planning docs (not committed)
+plan.md
+AGILE_SPRINTS.md
+
+# ── Backend (P2) ──────────────────────────────────────────────────────────────
+
+# Virtual environment (local dev only — never committed)
+backend/.venv/
+
+# Environment secrets
+backend/.env
+
+# SQLite database files
+backend/data/*.db
+backend/data/*.sqlite3
+backend/data/*.sqlite
+
+# Python cache
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+
+# Pytest cache and output
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+
+# Logs and temp audio processing artifacts
+backend/logs/
+backend/tmp/
+backend/temp/
+
+# Dataset archive packaged locally for manual Drive upload (not for git)
+test_data.zip
+test_data.zip.manifest.json
+script.md
+qa.md
+# TypeScript incremental build cache
+frontend/web/*.tsbuildinfo
+
+
+.vercel

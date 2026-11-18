@@ -1,0 +1,22 @@
+{
+  "organization": "enterprise",
+  "thresholds": {
+    "low_max": 7.5,
+    "medium_max": 85,
+    "high_min": 25,
+    "critical_min": 85
+  },
+  "actions": {
+    "low": "No action required. Continue normally.",
+    "medium": "Apply additional identity verification before proceeding.",
+    "high": "Perform independent callback and secondary verification.",
+    "critical": "Halt sensitive operation. Perform MFA and independent callback."
+  },
+  "webhook": {
+    "url": null,
+    "trigger_on": [
+      "high",
+      "critical"
+    ]
+  }
+}
